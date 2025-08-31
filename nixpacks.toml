@@ -13,3 +13,6 @@ cmd = "php artisan serve --host 0.0.0.0 --port $PORT"
 [static_assets]
 directory = "siiupa/public"
 rewrite_rule = "try_files $uri $uri/ /index.php?$query_string"
+
+[environment]
+PORT = "8080"

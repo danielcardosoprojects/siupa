@@ -1,3 +1,15 @@
-[phps]
-version = "8.1"
-extensions = ["bcmath", "ctype", "curl", "dom", "fileinfo", "gd", "mbstring", "openssl", "pdo", "pdo_mysql", "pdo_sqlite", "session", "simplexml", "tokenizer", "xml", "xmlreader", "xmlwriter", "zip"]
+[phases.setup]
+# Instala PHP 8.1 e Apache
+nixPkgs = ["php81", "apache2"]
+
+[phases.build]
+# Habilitar mod_rewrite
+cmds = ["a2enmod rewrite"]
+
+[start]
+# Rodar Apache em foreground para manter o container ativo
+cmd = "apache2ctl -D FOREGROUND"
+
+[ports]
+# Porta padrão do Apache
+http = 80

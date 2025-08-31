@@ -155,7 +155,7 @@ include_once('../bd/nivel.php');
                     echo "</select></label>";
                 }
                 $bdsetores = new BD;
-                $sqlsetores  = "SELECT  * FROM u940659928_siupa.tb_setor GROUP BY setor ASC";
+                $sqlsetores = "SELECT DISTINCT setor FROM u940659928_siupa.tb_setor ORDER BY setor ASC";
                 $resultadosetores  = $bdsetores->consulta($sqlsetores);
                 echo "<label>Setor:<select id='setorbusca' name='setorbusca' class='setorbusca form-control'>
         <option value='undefined'>TODOS</option>";
@@ -420,9 +420,9 @@ include_once('../bd/nivel.php');
                     echo "<td></td>";
                     echo "<td id='matriculaFunc_$dados->idfuncionario'><span class='matriculaFunc' data-id='$dados->idfuncionario'>$dados->matricula</span><i><span class='ui-icon ui-icon-copy copiarTexto' data-text='$dados->matricula'></span></i></td>";
 
-                    
-                    
-                    
+
+
+
                     //BUTTON VACATIONS
                     // echo "<td><button class='btn btn-success' onclick='abrirModalFerias($dados->idfuncionario)'>Férias</button></td>";
 
@@ -445,9 +445,9 @@ include_once('../bd/nivel.php');
                         document.getElementById('cpf_<?= $dados->idfuncionario ?>').innerHTML = '<?= $dados->cpf ?>'.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
                     </script>
 
-                    
+
             <?php
-            //COL WITH GENDER
+                    //COL WITH GENDER
                     $dados_sexo = "";
                     if ($dados->sexo == "F") {
                         $dados_sexo = "FEMININO";
@@ -467,7 +467,7 @@ include_once('../bd/nivel.php');
                     }
                     echo "<td>$dados->vinculo <i><span class='ui-icon ui-icon-copy copiarTexto' data-text='$dados->vinculo'></span></i> </td>";
                     echo "<td>$dados->carga_horaria</td>";
-                  
+
                     //COLS VACATIONS
                     // echo "<td>";
                     // $ferias23 = new BD;
@@ -581,7 +581,12 @@ include_once('../bd/nivel.php');
 <div class="contagem_cargos">
     <?php
     $bdContagemCargos = new BD;
-    $sqlCG = "SELECT c.titulo, count(c.titulo) as total, c.id FROM u940659928_siupa.tb_funcionario as f inner join u940659928_siupa.tb_cargo AS c on (f.fk_cargo = c.id) where status='ATIVO' group by c.titulo";
+    $status_ativo = 'ATIVO';
+    $sqlCG = "SELECT c.titulo, count(c.titulo) AS total, c.id
+          FROM u940659928_siupa.tb_funcionario AS f
+          INNER JOIN u940659928_siupa.tb_cargo AS c ON (f.fk_cargo = c.id)
+          WHERE status = ?
+          GROUP BY c.id, c.titulo";
     $rConsultaCargos = $bdContagemCargos->consulta($sqlCG);
     foreach ($rConsultaCargos as $rCG) {
         $tituloCG = $rCG->titulo;
@@ -589,7 +594,11 @@ include_once('../bd/nivel.php');
     }
 
     $bdContagemSetores = new BD;
-    $sqlCS = "SELECT s.id, s.setor, count(s.setor) as totalS FROM u940659928_siupa.tb_funcionario as f inner join u940659928_siupa.tb_setor as s on(f.fk_setor = s.id) where status='ATIVO' group by s.setor;";
+    $sqlCS = "SELECT s.id, s.setor, count(s.setor) AS totalS
+          FROM u940659928_siupa.tb_funcionario AS f
+          INNER JOIN u940659928_siupa.tb_setor AS s ON (f.fk_setor = s.id)
+          WHERE status = ?
+          GROUP BY s.id, s.setor";
     $rConsultaSetores = $bdContagemSetores->consulta($sqlCS);
     foreach ($rConsultaSetores as $rCS) {
         $tituloCS = $rCS->setor;

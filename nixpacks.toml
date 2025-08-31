@@ -1,2 +1,3 @@
-[phases.setup]
-nixPkgs = ['php81', 'php81Extensions.bcmath', 'php81Extensions.ctype', 'php81Extensions.curl', 'php81Extensions.dom', 'php81Extensions.fileinfo', 'php81Extensions.filter', 'php81Extensions.gd', 'php81Extensions.hash', 'php81Extensions.mbstring', 'php81Extensions.openssl', 'php81Extensions.pcre', 'php81Extensions.pdo', 'php81Extensions.pdo_mysql', 'php81Extensions.pdo_sqlite', 'php81Extensions.session', 'php81Extensions.simplexml', 'php81Extensions.tokenizer', 'php81Extensions.xml', 'php81Extensions.xmlreader', 'php81Extensions.xmlwriter', 'php81Extensions.zip']
+[phps]
+version = "8.1"
+extensions = ["bcmath", "ctype", "curl", "dom", "fileinfo", "gd", "mbstring", "openssl", "pdo", "pdo_mysql", "pdo_sqlite", "session", "simplexml", "tokenizer", "xml", "xmlreader", "xmlwriter", "zip"]

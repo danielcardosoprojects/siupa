@@ -1,42 +1,43 @@
-# Imagem base com Apache + PHP 8.1
-FROM php:8.1-apache
+# Etapa 1: PHP + Composer para instalar dependências
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY siiupa/composer.json siiupa/composer.lock ./
+RUN composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader
 
-# Instalar dependências necessárias para extensões PHP
+# Etapa 2: PHP-FPM + Nginx
+FROM php:8.2-fpm
+
+# Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libzip-dev \
+    nginx \
+    git \
+    unzip \
+    libpq-dev \
     libonig-dev \
     libxml2-dev \
-    libcurl4-openssl-dev \
-    unzip \
-    git \
+    zip \
     curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo pdo_mysql mysqli mbstring gd curl zip xml \
-    && rm -rf /var/lib/apt/lists/*
-# Instalar Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd
 
-# Configurar pasta do projeto
+# Definir pasta de trabalho
 WORKDIR /var/www/html
 
-# Copiar os arquivos do Laravel para dentro do container
-COPY . .
+# Copiar código Laravel (está dentro de /siiupa)
+COPY siiupa . 
 
-# Instalar dependências do Laravel
-RUN composer install --no-dev --optimize-autoloader
+# Copiar dependências do Composer
+COPY --from=vendor /app/vendor ./vendor
 
-# Dar permissão para a pasta de cache e logs
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Copiar configuração do Nginx
+COPY ./nginx.conf /etc/nginx/sites-available/default
 
-# Habilitar mod_rewrite no Apache (necessário para Laravel)
-RUN a2enmod rewrite
-COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
+# Permissões
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Expõe a porta 80
+# Expor porta
 EXPOSE 80
 
-# Rodar o Apache no foreground
-CMD ["apache2-foreground"]
+# Comando para rodar Nginx + PHP-FPM juntos
+CMD service nginx start && php-fpm

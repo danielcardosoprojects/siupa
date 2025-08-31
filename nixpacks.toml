@@ -1,3 +1,15 @@
-[phps]
-version = "8.1"
-extensions = ["bcmath", "ctype", "curl", "dom", "fileinfo", "gd", "mbstring", "openssl", "pdo", "pdo_mysql", "pdo_sqlite", "session", "simplexml", "tokenizer", "xml", "xmlreader", "xmlwriter", "zip"]
+providers = ["php"]
+workdir = "siiupa"
+
+[phases.setup]
+nixPkgs = ["...", "php81"]
+
+[phases.build]
+cmds = ["composer install --no-dev --optimize-autoloader"]
+
+[phases.start]
+cmd = "php artisan serve --host 0.0.0.0 --port $PORT"
+
+[static_assets]
+directory = "siiupa/public"
+rewrite_rule = "try_files $uri $uri/ /index.php?$query_string"

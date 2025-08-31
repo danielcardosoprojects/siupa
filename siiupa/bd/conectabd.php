@@ -23,7 +23,7 @@ if (!mysqli_set_charset($conn, 'utf8')) {
 //alterar aqui
 class BD
 {
-   var $servername = "localhost";
+   var $servername = "bd.siupa.online:6632";
    var $database = "u940659928_siupa";
    var $username = "u940659928_siupa";
    var $password = "4jHd@myhRDEBL@7";

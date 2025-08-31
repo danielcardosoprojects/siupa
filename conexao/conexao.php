@@ -1,10 +1,10 @@
 <?php
 
-$servername = "localhost";
+$servername = "localhost:6632";
 $database = "u940659928_siupa";
 $username = "u940659928_siupa";
 $password = "4jHd@myhRDEBL@7";
 // Create connection
 
 global $conexao;
-$conexao = mysqli_connect($servername, $username, $password, $database) or die ('Não foi possível conectar');
+$conexao = mysqli_connect($servername, $username, $password, $database) or die('Não foi possível conectar');

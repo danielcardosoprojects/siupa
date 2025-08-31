@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libonig-dev \
     libxml2-dev \
+    libcurl4-openssl-dev \
     unzip \
     git \
     curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo pdo_mysql mysqli mbstring gd curl zip xml \
     && rm -rf /var/lib/apt/lists/*
-
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

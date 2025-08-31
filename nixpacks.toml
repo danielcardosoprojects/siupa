@@ -1,7 +1,9 @@
 providers = ["php"]
+
+[build]
 workdir = "siiupa"
 
-[phases.setup]
+[build.phases.setup]
 nixPkgs = [
     "php81", 
     "php81Extensions.pdo", 
@@ -18,15 +20,14 @@ nixPkgs = [
     "composer"
 ]
 
-[phases.build]
+[build.phases.build]
 cmds = [
-    "cd siiupa",
-    "apt install composer",
     "composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction"
 ]
 
-[phases.start]
-cmd = "cd siiupa && php -S 0.0.0.0:$PORT"
+[start]
+cmd = "php -S 0.0.0.0:$PORT"
+workdir = "siiupa"
 
 [environment]
-PORT = "8080"
+PORT = "3000"

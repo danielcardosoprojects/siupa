@@ -1,3 +1,19 @@
+# Dependências
+siiupa/vendor/
+siiupa/composer.lock
 
-MAURO_E_ROSILDA.mp4
-MAURO_E_ROSILDA-Cover.jpg
+# Ambiente
+siiupa/.env
+siiupa/.env.*
+
+# Logs
+*.log
+logs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

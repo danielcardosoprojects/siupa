@@ -2,16 +2,30 @@ providers = ["php"]
 workdir = "siiupa"
 
 [phases.setup]
-nixPkgs = ["...", "php81", "php81Extensions.pdo", "php81Extensions.mbstring", "php81Extensions.json", "php81Extensions.openssl", "php81Extensions.gd", "php81Extensions.xml", "php81Extensions.dom", "php81Extensions.zip", "php81Extensions.exif", "php81Extensions.pcntl", "php81Extensions.bcmath"]
+nixPkgs = [
+    "php81", 
+    "php81Extensions.pdo", 
+    "php81Extensions.mbstring", 
+    "php81Extensions.json", 
+    "php81Extensions.openssl", 
+    "php81Extensions.gd", 
+    "php81Extensions.xml", 
+    "php81Extensions.dom", 
+    "php81Extensions.zip", 
+    "php81Extensions.exif", 
+    "php81Extensions.pcntl", 
+    "php81Extensions.bcmath",
+    "composer"
+]
 
 [phases.build]
-cmds = ["composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction"]
+cmds = [
+    "cd siiupa",
+    "composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction"
+]
 
 [phases.start]
-cmd = "php -S 0.0.0.0:$PORT index.php"
-[static_assets]
-directory = "siiupa/public"
-rewrite_rule = "try_files $uri $uri/ /index.php?$query_string"
+cmd = "cd siiupa && php -S 0.0.0.0:$PORT"
 
 [environment]
 PORT = "8080"

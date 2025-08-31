@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador de Estados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+ 
+ 
+            background-color: #000;
+        }
+        .state-container {
+            
+            
+            gap: 0px;
+            width: 100%;
+            height: 70%;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+        }
+        .state-button {
+            border: 1px solid black;
+            display: flex;
+          
+            justify-content: space-between;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            width: 50%;
+            height: 70%;
+            box-sizing: border-box;
+        }
+        .state-button button {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+            font-size: inherit;
+            font-weight: inherit;
+            cursor: pointer;
+        }
+        .state-button button:hover {
+            background-color: #ddd;
+        }
+        .count-display {
+            margin-left: 10px;
+            font-weight: normal;
+            font-size: 14px;
+        }
+        #resultsTable {
+            color:#fff;
+        }
+    </style>
+</head>
+<body>
+   
+
+    <div class="state-container" id="stateContainer">
+        Botões
+        <!-- Botões dos estados serão inseridos aqui pelo JavaScript -->
+    </div>
+
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>UF</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>AC</td>
+                <td id="ac_qtd"></td>
+            </tr>
+            <tr>
+                <td>AL</td>
+                <td id="al_qtd"></td>
+            </tr>
+            <tr>
+                <td>AP</td>
+                <td id="ap_qtd"></td>
+            </tr>
+            <tr>
+                <td>AM</td>
+                <td id="am_qtd"></td>
+            </tr>
+            <tr>
+                <td>BA</td>
+                <td id="ba_qtd"></td>
+            </tr>
+            <tr>
+                <td>CE</td>
+                <td id="ce_qtd"></td>
+            </tr>
+            <tr>
+                <td>DF</td>
+                <td id="df_qtd"></td>
+            </tr>
+            <tr>
+                <td>ES</td>
+                <td id="es_qtd"></td>
+            </tr>
+            <tr>
+                <td>GO</td>
+                <td id="go_qtd"></td>
+            </tr>
+            <tr>
+                <td>MA</td>
+                <td id="ma_qtd"></td>
+            </tr>
+            <tr>
+                <td>MT</td>
+                <td id="mt_qtd"></td>
+            </tr>
+            <tr>
+                <td>MS</td>
+                <td id="ms_qtd"></td>
+            </tr>
+            <tr>
+                <td>MG</td>
+                <td id="mg_qtd"></td>
+            </tr>
+            <tr>
+                <td>PA</td>
+                <td id="pa_qtd"></td>
+            </tr>
+            <tr>
+                <td>PB</td>
+                <td id="pb_qtd"></td>
+            </tr>
+            <tr>
+                <td>PR</td>
+                <td id="pr_qtd"></td>
+            </tr>
+            <tr>
+                <td>PE</td>
+                <td id="pe_qtd"></td>
+            </tr>
+            <tr>
+                <td>PI</td>
+                <td id="pi_qtd"></td>
+            </tr>
+            <tr>
+                <td>RJ</td>
+                <td id="rj_qtd"></td>
+            </tr>
+            <tr>
+                <td>RN</td>
+                <td id="rn_qtd"></td>
+            </tr>
+            <tr>
+                <td>RS</td>
+                <td id="rs_qtd"></td>
+            </tr>
+            <tr>
+                <td>RO</td>
+                <td id="ro_qtd"></td>
+            </tr>
+            <tr>
+                <td>RR</td>
+                <td id="rr_qtd"></td>
+            </tr>
+            <tr>
+                <td>SC</td>
+                <td id="sc_qtd"></td>
+            </tr>
+            <tr>
+                <td>SP</td>
+                <td id="sp_qtd"></td>
+            </tr>
+            <tr>
+                <td>SE</td>
+                <td id="se_qtd"></td>
+            </tr>
+            <tr>
+                <td>TO</td>
+                <td id="to_qtd"></td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        const estados = [
+            { uf: "AC", atalho: "a" }, { uf: "AL", atalho: "b" },
+            { uf: "AP", atalho: "c" }, { uf: "AM", atalho: "d" },
+            { uf: "BA", atalho: "e" }, { uf: "CE", atalho: "f" },
+            { uf: "DF", atalho: "g" }, { uf: "ES", atalho: "h" },
+            { uf: "GO", atalho: "i" }, { uf: "MA", atalho: "j" },
+            { uf: "MT", atalho: "k" }, { uf: "MS", atalho: "l" },
+            { uf: "MG", atalho: "m" }, { uf: "PA", atalho: "n" },
+            { uf: "PB", atalho: "o" }, { uf: "PR", atalho: "p" },
+            { uf: "PE", atalho: "q" }, { uf: "PI", atalho: "r" },
+            { uf: "RJ", atalho: "s" }, { uf: "RN", atalho: "t" },
+            { uf: "RS", atalho: "u" }, { uf: "RO", atalho: "v" },
+            { uf: "RR", atalho: "w" }, { uf: "SC", atalho: "x" },
+            { uf: "SP", atalho: "y" }, { uf: "SE", atalho: "z" },
+            { uf: "TO", atalho: "ç" }
+        ];
+
+        const stateContainer = document.getElementById('stateContainer');
+        const counts = {};
+
+        // Paleta de cores em tons pastéis para os botões
+        const coresPastel = [
+            '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#FFB3E6',
+            '#C2F0C2', '#F5B7B1', '#D0B4F1', '#FFB7C5', '#D2F7D1', '#D0E9FF',
+            '#F4E1D2', '#A8D8B9', '#F9E79F', '#F7C4B6', '#B5EAD7', '#F6A6A1',
+            '#F1E3B3', '#C9B6E4', '#F9D5D3', '#C8D8E4', '#FFFCBB', '#F3E4E8',
+            '#FFDCF2', '#D1F4F2'
+        ];
+
+        // Função para criar os botões de estados
+        estados.forEach((estado, index) => {
+            counts[estado.uf] = 0;
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.classList.add('state-button');
+            buttonContainer.style.backgroundColor = coresPastel[index % coresPastel.length];  // Atribui cor ao botão
+
+            const incrementButton = document.createElement('button');
+            incrementButton.innerText = `${estado.uf}`;
+            incrementButton.onclick = () => updateCount(estado.uf, 1);
+
+            const countDisplay = document.createElement('span');
+            countDisplay.id = `count-${estado.uf}`;
+            countDisplay.classList.add('count-display');
+            countDisplay.innerText = counts[estado.uf];
+
+            buttonContainer.appendChild(incrementButton);
+            buttonContainer.appendChild(countDisplay);
+            stateContainer.appendChild(buttonContainer);
+        });
+
+        // Função para atualizar a contagem
+        function updateCount(uf, increment) {
+            counts[uf] += increment;
+            if (counts[uf] < 0) counts[uf] = 0;
+            document.getElementById(`count-${uf}`).innerText = counts[uf];
+            
+            document.getElementById(`${uf.toLowerCase()}_qtd`).innerHTML = counts[uf];
+            
+    
+        }
+
+        // Atalhos de teclado para incrementar contagens
+        document.addEventListener('keydown', (event) => {
+            const pressedKey = event.key.toLowerCase();
+            const state = estados.find(e => e.atalho === pressedKey);
+            if (state) {
+                updateCount(state.uf, 1);  // Apenas a letra adiciona
+            }
+        });
+    </script>
+
+</body>
+</html>

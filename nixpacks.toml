@@ -1,0 +1,6 @@
+[phases.setup]
+  providers = ["php"]
+  nixPkgs = ["php", "nginx"]
+
+[start]
+  cmd = "php -S 0.0.0.0:8001 index.php"

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIUPA - Trocas</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <script src="topo.js?v=4" defer></script>
+  </head>
+
+  <body>
+    <meu-topo></meu-topo>
+
+    <div class="container mt-5">
+      <h2>Gestão de Trocas</h2>
+
+      <!-- Botão para abrir o modal de cadastro -->
+      <button
+        class="btn btn-primary mb-3"
+        data-bs-toggle="modal"
+        data-bs-target="#modalCadastro"
+      >
+        Cadastrar Profissional
+      </button>
+
+      <!-- Tabela de profissionais -->
+      <table id="profissionais" class="table table-striped">
+        <thead>
+          <tr>
+            <th>Profissional</th>
+            <th>Datas trocadas</th>
+            <th>Registro</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Modal de Cadastro e Edição -->
+    <div
+      class="modal fade"
+      id="modalCadastro"
+      tabindex="-1"
+      aria-labelledby="modalCadastroLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalCadastroLabel">
+              Cadastrar Profissional
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="formCadastro">
+              <div class="mb-3">
+                <label for="nome" class="form-label">Profissional</label>
+                <input type="text" class="form-control" id="nome" required />
+              </div>
+              <div class="mb-3">
+                <label for="funcao" class="form-label">Função</label>
+                <select class="form-select" id="funcao" required></select>
+              </div>
+              <div class="mb-3">
+                <label for="registro" class="form-label"
+                  >Registro Conselho</label
+                >
+                <input type="text" class="form-control" id="registro" />
+              </div>
+              <button type="submit" class="btn btn-primary">Salvar</button>
+              <input type="hidden" id="id_profissional" />
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        //console.log(sessionStorage.token);
+
+        const apiProfissionais =
+          "https://www.siupa.com.br/siiupa/api/api.php/records/tb_farmprofissional";
+        const apiCargos =
+          "https://www.siupa.com.br/siiupa/api/api.php/records/tb_cargo?order=descricao,asc";
+        const table = $("#profissionais").DataTable();
+
+        // Carregar profissionais na tabela
+        const apiTrocas =
+          "https://siupa.com.br/siiupa/api/api.php/records/tb_trocaplantao?join=tb_funcionario,tb_cargo&include=id,func1,func2,tb_funcionario.nome,tb_cargo.titulo,data1,data2,turno1,turno2";
+
+        function carregarProfissionais() {
+          const trocas = {}; // objeto por pessoa
+          table.clear();
+
+          $.get(apiTrocas, function (data) {
+            data.records.forEach(function (item) {
+              const trocaId = String(item.id);
+              const id1 = String(item.func1?.id ?? "");
+              const id2 = String(item.func2?.id ?? "");
+              const nome1 = item.func1?.nome || "";
+              const nome2 = item.func2?.nome || "";
+
+              function garantePessoa(id, nome) {
+                if (!trocas[id]) {
+                  trocas[id] = {
+                    nome: nome,
+                    trocas: {},
+                  };
+                }
+              }
+
+              garantePessoa(id1, nome1);
+              garantePessoa(id2, nome2);
+
+              // para func1, com quem trocou é func2
+              if (id1) {
+                trocas[id1].trocas[trocaId] = {
+                  id: trocaId,
+                  data: item.data1,
+                  comquem: id2,
+                  nome: nome2, // nome de quem está trocando
+                };
+              }
+              // para func2, com quem trocou é func1
+              if (id2) {
+                trocas[id2].trocas[trocaId] = {
+                  id: trocaId,
+                  data: item.data2,
+                  comquem: id1,
+                  nome: nome1,
+                };
+              }
+
+              // popula a tabela (mostrando func1)
+              //       table.row
+              //         .add([
+              //           nome1,
+              //           item.func1?.fk_cargo?.titulo || "",
+              //           item.data1 || "",
+              //           `<button class="btn btn-warning btn-sm" onclick="editar(${item.id})">Editar</button>
+              //    <button class="btn btn-danger btn-sm" onclick="excluir(${item.id})">Excluir</button>`,
+              //         ])
+              //         .draw();
+            });
+
+            console.log(trocas);
+            popularTabelaComTrocas(trocas);
+            // ex: JSON.stringify(trocas) se precisar
+          });
+        }
+        function formatarDataBR(dataISO) {
+          if (!dataISO) return "";
+          const partes = dataISO.split("-");
+          if (partes.length !== 3) return dataISO; // caso não seja no formato esperado
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+
+        function popularTabelaComTrocas(trocas) {
+          table.clear();
+
+          Object.keys(trocas).forEach(function (idPessoa) {
+            const pessoa = trocas[idPessoa];
+            const nomePessoa = pessoa.nome;
+
+            // pega todas as datas formatadas
+            const datas = Object.values(pessoa.trocas).map((t) =>
+              formatarDataBR(t.data)
+            );
+
+            // remove duplicatas e ordena
+            const datasUnicas = [...new Set(datas)].sort((a, b) => {
+              // converte para Date pra ordenar corretamente
+              const [d1, m1, y1] = a.split("/");
+              const [d2, m2, y2] = b.split("/");
+              return new Date(y1, m1 - 1, d1) - new Date(y2, m2 - 1, d2);
+            });
+
+            const datasStr = datasUnicas.join(", ");
+
+            table.row.add([
+              nomePessoa,
+              datasStr,
+              "", // terceira coluna (pode deixar vazia por enquanto)
+              "", // quarta coluna (também vazia ou com valor)
+            ]);
+          });
+
+          table.draw();
+        }
+
+        // Carregar cargos para o select
+        function carregarFuncoes() {
+          $.get(apiCargos, function (data) {
+            $("#funcao").empty();
+            data.records.forEach(function (item) {
+              $("#funcao").append(new Option(item.descricao, item.descricao));
+            });
+          });
+        }
+
+        // Chamar funções ao carregar a página
+        carregarFuncoes();
+        carregarProfissionais();
+
+        // Formulário de cadastro e edição
+        $("#formCadastro").on("submit", function (e) {
+          e.preventDefault();
+
+          const id = $("#id_profissional").val();
+          const nome = $("#nome").val();
+          const funcao = $("#funcao").val();
+          const registro = $("#registro").val();
+
+          const dados = {
+            profissional: nome,
+            funcao: funcao,
+            n_conselho: registro,
+          };
+
+          if (id) {
+            // Editar profissional
+            $.ajax({
+              url: `${apiProfissionais}/${id}`,
+              method: "PUT",
+              contentType: "application/json",
+              data: JSON.stringify(dados),
+              success: function () {
+                alert("Profissional atualizado!");
+                $("#modalCadastro").modal("hide");
+                carregarProfissionais();
+              },
+            });
+          } else {
+            // Cadastrar novo profissional
+            $.ajax({
+              url: apiProfissionais,
+              method: "POST",
+              contentType: "application/json",
+              data: JSON.stringify(dados),
+              success: function () {
+                alert("Profissional cadastrado!");
+                $("#modalCadastro").modal("hide");
+                carregarProfissionais();
+              },
+            });
+          }
+        });
+
+        // Editar profissional
+        window.editar = function (id) {
+          $.get(`${apiProfissionais}/${id}`, function (data) {
+            const profissional = data;
+            // console.log(data);
+            $("#nome").val(profissional.profissional);
+            $("#funcao").val(profissional.funcao);
+            $("#registro").val(profissional.n_conselho);
+            $("#id_profissional").val(profissional.id);
+            $("#modalCadastroLabel").text("Editar Profissional");
+            $("#modalCadastro").modal("show");
+          });
+        };
+
+        // Excluir profissional
+        window.excluir = function (id) {
+          if (confirm("Tem certeza que deseja excluir este profissional?")) {
+            $.ajax({
+              url: `${apiProfissionais}/${id}`,
+              method: "DELETE",
+              success: function () {
+                alert("Profissional excluído!");
+                carregarProfissionais();
+              },
+            });
+          }
+        };
+      });
+    </script>
+  </body>
+</html>

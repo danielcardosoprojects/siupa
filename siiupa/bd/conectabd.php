@@ -1,6 +1,6 @@
 <?php
 
-$servername = "localhost";
+$servername = "bd.siupa.online:6632";
 $database = "u940659928_siupa";
 $username = "u940659928_siupa";
 $password = "4jHd@myhRDEBL@7";
@@ -80,25 +80,25 @@ class BD
       $bd = new PDO("mysql:host=$this->servername;dbname=$this->database", "$this->username", "$this->password");
 
 
-      
 
-      
+
+
       $conJSON = new BD;
 
       $retornoJSON = "";
       $retornoJSON .= "{";
-         foreach ($conJSON->consulta($sql) as $key1 => $teste) {
-             
-            $retornoJSON .=  "'$key1':{";
-             foreach ($teste as $key => $valor) {
-               $retornoJSON .=  "'$key':'$valor',";
-             }
-             $retornoJSON .=  "},";
+      foreach ($conJSON->consulta($sql) as $key1 => $teste) {
+
+         $retornoJSON .=  "'$key1':{";
+         foreach ($teste as $key => $valor) {
+            $retornoJSON .=  "'$key':'$valor',";
          }
-         $retornoJSON .=  "}";
+         $retornoJSON .=  "},";
+      }
+      $retornoJSON .=  "}";
 
       //$resultado = $busca->fetchAll(PDO::FETCH_OBJ);
-      
+
       return $retornoJSON;
 
       //$sql = "SELECT * FROM u940659928_siupa.tb_escalas";

@@ -1,6 +1,6 @@
 <?php
 
-$servername = "localhost:6632";
+$servername = "bd.siupa.online:6632";
 $database = "u940659928_siupa";
 $username = "u940659928_siupa";
 $password = "4jHd@myhRDEBL@7";

@@ -12,15 +12,16 @@ include_once('tabelas.php');
         font-size: .7rem;
         border-radius: .2rem;
         color: #fff;
-        cursor: default;        
+        cursor: default;
         border-color: #0d6efd;
     }
+
     .rascunho {
         background-color: #ffc133;
         padding: .2rem .3rem;
         font-size: .7rem;
         border-radius: .2rem;
-        color: #ff6433 ;
+        color: #ff6433;
         cursor: default;
         border-color: #0d6efd;
     }
@@ -101,7 +102,24 @@ include_once('tabelas.php');
 
 
 
-    $sql = "SELECT * FROM u940659928_siupa.tb_escalas GROUP BY ano desc, mes desc  ";
+    $sql = "SELECT
+    t1.*
+FROM
+    u940659928_siupa.tb_escalas AS t1
+INNER JOIN (
+    SELECT
+        ano,
+        mes,
+        MAX(id) AS max_id
+    FROM
+        u940659928_siupa.tb_escalas
+    GROUP BY
+        ano,
+        mes
+) AS t2 ON t1.ano = t2.ano AND t1.mes = t2.mes AND t1.id = t2.max_id
+ORDER BY
+    t1.ano DESC,
+    t1.mes DESC";
     $busca = new BD;
     $resultado = $busca->consulta($sql);
     $mesext = new Data;
@@ -116,11 +134,10 @@ include_once('tabelas.php');
         }
 
         $mesParaFrequencias = "";
-        if($escalas->mes >10) {
+        if ($escalas->mes > 10) {
             $mesParaFrequencias = $escalas->mes;
         } else {
-            $mesParaFrequencias = "0".$escalas->mes;
-
+            $mesParaFrequencias = "0" . $escalas->mes;
         }
 
         echo "   
@@ -139,13 +156,13 @@ include_once('tabelas.php');
             } else {
                 $tipo_escala = "<span class='rascunho'>RASCUNHO</span>";
             }
-           
+
             echo "$tipo_escala <strong><a href='?setor=adm&sub=rhescala_exibe&id=$escalasmes->id&mes=$escalasmes->mes&ano=$escalasmes->ano&oficial=$escalasmes->oficial'>$escalasmes->setor</a>
             <a title='Imprimir esta escala' class='' href='administracao/pagina_escala_esqueleto.php?id=$escalasmes->id&setorExt=$escalasmes->setor&mesExt=$mesextenso&anoExt=$escalasmes->ano' target='_blank'>
             <img src='imagens/icones/impressora.svg' width='15px'></a>
             <a title='Gerar rascunho para folha' class='' href='administracao/pagina_escala_esqueletofolha.php?id=$escalasmes->id&setorExt=$escalasmes->setor&mesExt=$mesextenso&anoExt=$escalasmes->ano' target='_blank'>
             <span class='ui-icon ui-icon-bookmark'></span></a>
-            <a title='Gerar todas as frequências desta escala' class='' href='https://painel-controle-siupa.vercel.app/frequencias/$escalasmes->id/$escalasmes->ano"."$mesParaFrequencias' target='_blank'>
+            <a title='Gerar todas as frequências desta escala' class='' href='https://painel-controle-siupa.vercel.app/frequencias/$escalasmes->id/$escalasmes->ano" . "$mesParaFrequencias' target='_blank'>
              <span class='ui-icon ui-icon-calculator'></span></a>
             
             <br></strong>";

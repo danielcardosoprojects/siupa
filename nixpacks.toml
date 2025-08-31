@@ -8,8 +8,7 @@ nixPkgs = ["...", "php81", "php81Extensions.pdo", "php81Extensions.mbstring", "p
 cmds = ["composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction"]
 
 [phases.start]
-cmd = "php -S 0.0.0.0:$PORT public/index.php"
-
+cmd = "php -S 0.0.0.0:$PORT index.php"
 [static_assets]
 directory = "siiupa/public"
 rewrite_rule = "try_files $uri $uri/ /index.php?$query_string"

@@ -2,7 +2,9 @@
 session_start();
 header('Content-Type: text/html; charset=utf-8');
 include("bd/conectabd.php");
-include('../conexao/verifica_login.php');
+echo ($_SERVER['DOCUMENT_ROOT'] . '/conexao/verifica_login.php');
+
+include($_SERVER['DOCUMENT_ROOT'] . '/conexao/verifica_login.php');
 
 ?>
 

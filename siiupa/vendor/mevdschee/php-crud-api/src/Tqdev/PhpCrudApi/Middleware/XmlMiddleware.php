@@ -6,20 +6,17 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Tqdev\PhpCrudApi\Column\ReflectionService;
+use Tqdev\PhpCrudApi\Config\Config;
 use Tqdev\PhpCrudApi\Controller\Responder;
 use Tqdev\PhpCrudApi\Middleware\Base\Middleware;
 use Tqdev\PhpCrudApi\Middleware\Router\Router;
-use Tqdev\PhpCrudApi\RequestUtils;
 use Tqdev\PhpCrudApi\ResponseFactory;
 
 class XmlMiddleware extends Middleware
 {
-    private $reflection;
-
-    public function __construct(Router $router, Responder $responder, array $properties, ReflectionService $reflection)
+    public function __construct(Router $router, Responder $responder, Config $config, string $middleware)
     {
-        parent::__construct($router, $responder, $properties);
-        $this->reflection = $reflection;
+        parent::__construct($router, $responder, $config, $middleware);
     }
 
     private function json2xml($json, $types = 'null,boolean,number,string,object,array')
@@ -52,6 +49,7 @@ class XmlMiddleware extends Middleware
                 }
             } else {
                 foreach ($a as $k => $v) {
+                    $k = preg_replace('/[^a-z0-9\-\_\.]/', '', $k);
                     if ($k == '__type' && $t($a) == 'object') {
                         $c->setAttribute('__type', $v);
                     } else {
@@ -66,7 +64,7 @@ class XmlMiddleware extends Middleware
                             if ($t($v) == 'boolean') {
                                 $va->appendChild($d->createTextNode($v ? 'true' : 'false'));
                             } else {
-                                $va->appendChild($d->createTextNode($v));
+                                $va->appendChild($d->createTextNode((string) $v));
                             }
                             $ch = $c->appendChild($va);
                             if (in_array($t($v), $ts)) {
@@ -81,15 +79,15 @@ class XmlMiddleware extends Middleware
         return $d->saveXML($d->documentElement);
     }
 
-    private function xml2json($xml)
+    private function xml2json($xml): string
     {
         $o = @simplexml_load_string($xml);
-        if ($o===false) {
-            return null;
+        if ($o === false) {
+            return '';
         }
         $a = @dom_import_simplexml($o);
         if (!$a) {
-            return null;
+            return '';
         }
         $t = function ($v) {
             $t = $v->getAttribute('type');
@@ -127,7 +125,7 @@ class XmlMiddleware extends Middleware
             return $c;
         };
         $c = $f($f, $a);
-        return json_encode($c);
+        return (string) json_encode($c);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface

@@ -5,7 +5,7 @@ namespace Tqdev\PhpCrudApi\GeoJson;
 class Geometry implements \JsonSerializable
 {
     private $type;
-    private $geometry;
+    private $coordinates;
 
     public static $types = [
         "Point",
@@ -57,6 +57,7 @@ class Geometry implements \JsonSerializable
         ];
     }
 
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->serialize();

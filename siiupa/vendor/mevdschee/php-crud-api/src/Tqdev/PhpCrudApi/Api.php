@@ -8,6 +8,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Tqdev\PhpCrudApi\Cache\CacheFactory;
 use Tqdev\PhpCrudApi\Column\DefinitionService;
 use Tqdev\PhpCrudApi\Column\ReflectionService;
+use Tqdev\PhpCrudApi\Config\Config;
 use Tqdev\PhpCrudApi\Controller\CacheController;
 use Tqdev\PhpCrudApi\Controller\ColumnController;
 use Tqdev\PhpCrudApi\Controller\GeoJsonController;
@@ -35,19 +36,17 @@ use Tqdev\PhpCrudApi\Middleware\ReconnectMiddleware;
 use Tqdev\PhpCrudApi\Middleware\Router\SimpleRouter;
 use Tqdev\PhpCrudApi\Middleware\SanitationMiddleware;
 use Tqdev\PhpCrudApi\Middleware\SslRedirectMiddleware;
+use Tqdev\PhpCrudApi\Middleware\TextSearchMiddleware;
 use Tqdev\PhpCrudApi\Middleware\ValidationMiddleware;
+use Tqdev\PhpCrudApi\Middleware\WpAuthMiddleware;
 use Tqdev\PhpCrudApi\Middleware\XmlMiddleware;
 use Tqdev\PhpCrudApi\Middleware\XsrfMiddleware;
 use Tqdev\PhpCrudApi\OpenApi\OpenApiService;
-use Tqdev\PhpCrudApi\Record\ErrorCode;
 use Tqdev\PhpCrudApi\Record\RecordService;
-use Tqdev\PhpCrudApi\ResponseUtils;
 
 class Api implements RequestHandlerInterface
 {
     private $router;
-    private $responder;
-    private $debug;
 
     public function __construct(Config $config)
     {
@@ -56,78 +55,87 @@ class Api implements RequestHandlerInterface
             $config->getAddress(),
             $config->getPort(),
             $config->getDatabase(),
+            $config->getCommand(),
             $config->getTables(),
+            $config->getMapping(),
             $config->getUsername(),
-            $config->getPassword()
+            $config->getPassword(),
+            $config->getGeometrySrid()
         );
-        $prefix = sprintf('phpcrudapi-%s-', substr(md5(__FILE__), 0, 8));
+        $prefix = sprintf('phpcrudapi-%s-', substr($config->getUID(), 0, 8));
         $cache = CacheFactory::create($config->getCacheType(), $prefix, $config->getCachePath());
         $reflection = new ReflectionService($db, $cache, $config->getCacheTime());
-        $responder = new JsonResponder($config->getDebug());
+        $responder = new JsonResponder($config->getJsonOptions(), $config->getDebug());
         $router = new SimpleRouter($config->getBasePath(), $responder, $cache, $config->getCacheTime());
-        foreach ($config->getMiddlewares() as $middleware => $properties) {
+        foreach ($config->getMiddlewares() as $middleware) {
             switch ($middleware) {
                 case 'sslRedirect':
-                    new SslRedirectMiddleware($router, $responder, $properties);
+                    new SslRedirectMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'cors':
-                    new CorsMiddleware($router, $responder, $properties, $config->getDebug());
+                    new CorsMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'firewall':
-                    new FirewallMiddleware($router, $responder, $properties);
+                    new FirewallMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'apiKeyAuth':
-                    new ApiKeyAuthMiddleware($router, $responder, $properties);
+                    new ApiKeyAuthMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'apiKeyDbAuth':
-                    new ApiKeyDbAuthMiddleware($router, $responder, $properties, $reflection, $db);
+                    new ApiKeyDbAuthMiddleware($router, $responder, $config, $middleware, $reflection, $db);
                     break;
                 case 'basicAuth':
-                    new BasicAuthMiddleware($router, $responder, $properties);
+                    new BasicAuthMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'jwtAuth':
-                    new JwtAuthMiddleware($router, $responder, $properties);
+                    new JwtAuthMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'dbAuth':
-                    new DbAuthMiddleware($router, $responder, $properties, $reflection, $db);
+                    new DbAuthMiddleware($router, $responder, $config, $middleware, $reflection, $db);
+                    break;
+                case 'wpAuth':
+                    new WpAuthMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'reconnect':
-                    new ReconnectMiddleware($router, $responder, $properties, $reflection, $db);
+                    new ReconnectMiddleware($router, $responder, $config, $middleware, $reflection, $db);
                     break;
                 case 'validation':
-                    new ValidationMiddleware($router, $responder, $properties, $reflection);
+                    new ValidationMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'ipAddress':
-                    new IpAddressMiddleware($router, $responder, $properties, $reflection);
+                    new IpAddressMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'sanitation':
-                    new SanitationMiddleware($router, $responder, $properties, $reflection);
+                    new SanitationMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'multiTenancy':
-                    new MultiTenancyMiddleware($router, $responder, $properties, $reflection);
+                    new MultiTenancyMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'authorization':
-                    new AuthorizationMiddleware($router, $responder, $properties, $reflection);
+                    new AuthorizationMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'xsrf':
-                    new XsrfMiddleware($router, $responder, $properties);
+                    new XsrfMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'pageLimits':
-                    new PageLimitsMiddleware($router, $responder, $properties, $reflection);
+                    new PageLimitsMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'joinLimits':
-                    new JoinLimitsMiddleware($router, $responder, $properties, $reflection);
+                    new JoinLimitsMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'customization':
-                    new CustomizationMiddleware($router, $responder, $properties, $reflection);
+                    new CustomizationMiddleware($router, $responder, $config, $middleware, $reflection);
+                    break;
+                case 'textSearch':
+                    new TextSearchMiddleware($router, $responder, $config, $middleware, $reflection);
                     break;
                 case 'xml':
-                    new XmlMiddleware($router, $responder, $properties, $reflection);
+                    new XmlMiddleware($router, $responder, $config, $middleware);
                     break;
                 case 'json':
-                    new JsonMiddleware($router, $responder, $properties);
+                    new JsonMiddleware($router, $responder, $config, $middleware);
                     break;
-                }
+            }
         }
         foreach ($config->getControllers() as $controller) {
             switch ($controller) {
@@ -153,18 +161,15 @@ class Api implements RequestHandlerInterface
                     break;
                 case 'status':
                     new StatusController($router, $responder, $cache, $db);
-                    break;                    
+                    break;
             }
         }
         foreach ($config->getCustomControllers() as $className) {
             if (class_exists($className)) {
-                $records = new RecordService($db, $reflection);
-                new $className($router, $responder, $records);
+                new $className($router, $responder, $db, $reflection, $cache);
             }
         }
         $this->router = $router;
-        $this->responder = $responder;
-        $this->debug = $config->getDebug();
     }
 
     private function parseBody(string $body) /*: ?object*/

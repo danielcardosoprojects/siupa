@@ -10,10 +10,10 @@ class ColumnsBuilder
     private $driver;
     private $converter;
 
-    public function __construct(string $driver)
+    public function __construct(string $driver, int $geometrySrid)
     {
         $this->driver = $driver;
-        $this->converter = new ColumnConverter($driver);
+        $this->converter = new ColumnConverter($driver, $geometrySrid);
     }
 
     public function getOffsetLimit(int $offset, int $limit): string
@@ -35,7 +35,7 @@ class ColumnsBuilder
 
     private function quoteColumnName(ReflectedColumn $column): string
     {
-        return '"' . $column->getName() . '"';
+        return '"' . $column->getRealName() . '"';
     }
 
     public function getOrderBy(ReflectedTable $table, array $columnOrdering): string

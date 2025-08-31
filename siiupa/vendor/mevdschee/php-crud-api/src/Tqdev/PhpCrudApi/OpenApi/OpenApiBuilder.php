@@ -11,6 +11,7 @@ class OpenApiBuilder
     private $openapi;
     private $records;
     private $columns;
+    private $status;
     private $builders;
 
     public function __construct(ReflectionService $reflection, array $base, array $controllers, array $builders)
@@ -37,7 +38,7 @@ class OpenApiBuilder
     {
         $this->openapi->set("openapi", "3.0.0");
         if (!$this->openapi->has("servers")) {
-            $this->openapi->set("servers|0|url", $this->getServerUrl($request));
+            $this->openapi->set("servers||url", $this->getServerUrl($request));
         }
         if ($this->records) {
             $this->records->build();

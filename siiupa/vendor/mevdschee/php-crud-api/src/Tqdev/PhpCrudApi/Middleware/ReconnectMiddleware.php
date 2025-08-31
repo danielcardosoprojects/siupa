@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Tqdev\PhpCrudApi\Column\ReflectionService;
+use Tqdev\PhpCrudApi\Config\Config;
 use Tqdev\PhpCrudApi\Controller\Responder;
 use Tqdev\PhpCrudApi\Database\GenericDB;
 use Tqdev\PhpCrudApi\Middleware\Base\Middleware;
@@ -13,13 +14,13 @@ use Tqdev\PhpCrudApi\Middleware\Router\Router;
 
 class ReconnectMiddleware extends Middleware
 {
-    private $reflection;
+    private $config;
     private $db;
 
-    public function __construct(Router $router, Responder $responder, array $properties, ReflectionService $reflection, GenericDB $db)
+    public function __construct(Router $router, Responder $responder, Config $config, string $middleware, ReflectionService $reflection, GenericDB $db)
     {
-        parent::__construct($router, $responder, $properties);
-        $this->reflection = $reflection;
+        parent::__construct($router, $responder, $config, $middleware);
+        $this->config = $config;
         $this->db = $db;
     }
 
@@ -29,7 +30,7 @@ class ReconnectMiddleware extends Middleware
         if ($driverHandler) {
             return call_user_func($driverHandler);
         }
-        return '';
+        return $this->config->getDriver();
     }
 
     private function getAddress(): string
@@ -38,7 +39,7 @@ class ReconnectMiddleware extends Middleware
         if ($addressHandler) {
             return call_user_func($addressHandler);
         }
-        return '';
+        return $this->config->getAddress();
     }
 
     private function getPort(): int
@@ -47,7 +48,7 @@ class ReconnectMiddleware extends Middleware
         if ($portHandler) {
             return call_user_func($portHandler);
         }
-        return 0;
+        return $this->config->getPort();
     }
 
     private function getDatabase(): string
@@ -56,7 +57,16 @@ class ReconnectMiddleware extends Middleware
         if ($databaseHandler) {
             return call_user_func($databaseHandler);
         }
-        return '';
+        return $this->config->getDatabase();
+    }
+
+    private function getCommand(): string
+    {
+        $commandHandler = $this->getProperty('commandHandler', '');
+        if ($commandHandler) {
+            return call_user_func($commandHandler);
+        }
+        return $this->config->getCommand();
     }
 
     private function getTables(): array
@@ -65,7 +75,16 @@ class ReconnectMiddleware extends Middleware
         if ($tablesHandler) {
             return call_user_func($tablesHandler);
         }
-        return [];
+        return $this->config->getTables();
+    }
+
+    private function getMapping(): array
+    {
+        $mappingHandler = $this->getProperty('mappingHandler', '');
+        if ($mappingHandler) {
+            return call_user_func($mappingHandler);
+        }
+        return $this->config->getMapping();
     }
 
     private function getUsername(): string
@@ -74,7 +93,7 @@ class ReconnectMiddleware extends Middleware
         if ($usernameHandler) {
             return call_user_func($usernameHandler);
         }
-        return '';
+        return $this->config->getUsername();
     }
 
     private function getPassword(): string
@@ -83,7 +102,16 @@ class ReconnectMiddleware extends Middleware
         if ($passwordHandler) {
             return call_user_func($passwordHandler);
         }
-        return '';
+        return $this->config->getPassword();
+    }
+
+    private function getGeometrySrid(): int
+    {
+        $geometrySridHandler = $this->getProperty('geometrySridHandler', '');
+        if ($geometrySridHandler) {
+            return call_user_func($geometrySridHandler);
+        }
+        return $this->config->getGeometrySrid();
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface
@@ -92,12 +120,13 @@ class ReconnectMiddleware extends Middleware
         $address = $this->getAddress();
         $port = $this->getPort();
         $database = $this->getDatabase();
+        $command = $this->getCommand();
         $tables = $this->getTables();
+        $mapping = $this->getMapping();
         $username = $this->getUsername();
         $password = $this->getPassword();
-        if ($driver || $address || $port || $database || $tables || $username || $password) {
-            $this->db->reconstruct($driver, $address, $port, $database, $tables, $username, $password);
-        }
+        $geometrySrid = $this->getGeometrySrid();
+        $this->db->reconstruct($driver, $address, $port, $database, $command, $tables, $mapping, $username, $password, $geometrySrid);
         return $next->handle($request);
     }
 }

@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Tqdev\PhpCrudApi\Column\ReflectionService;
+use Tqdev\PhpCrudApi\Config\Config;
 use Tqdev\PhpCrudApi\Controller\Responder;
 use Tqdev\PhpCrudApi\Middleware\Base\Middleware;
 use Tqdev\PhpCrudApi\Middleware\Communication\VariableStore;
@@ -18,9 +19,9 @@ class AuthorizationMiddleware extends Middleware
 {
     private $reflection;
 
-    public function __construct(Router $router, Responder $responder, array $properties, ReflectionService $reflection)
+    public function __construct(Router $router, Responder $responder, Config $config, string $middleware, ReflectionService $reflection)
     {
-        parent::__construct($router, $responder, $properties);
+        parent::__construct($router, $responder, $config, $middleware);
         $this->reflection = $reflection;
     }
 
@@ -65,7 +66,7 @@ class AuthorizationMiddleware extends Middleware
             $query = call_user_func($recordHandler, $operation, $tableName);
             $filters = new FilterInfo();
             $table = $this->reflection->getTable($tableName);
-            $query = str_replace('][]=', ']=', str_replace('=', '[]=', $query));
+            $query = str_replace('][]=', ']=', str_replace('=', '[]=', $query ?: ''));
             parse_str($query, $params);
             $condition = $filters->getCombinedConditions($table, $params);
             VariableStore::set("authorization.conditions.$tableName", $condition);

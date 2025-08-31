@@ -26,7 +26,7 @@ cmds = [
 ]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT"
+cmd = "php -S 0.0.0.0:$PORT router.php"
 workdir = "siiupa"
 
 [environment]

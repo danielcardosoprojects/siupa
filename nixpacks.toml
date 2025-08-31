@@ -21,6 +21,7 @@ nixPkgs = [
 [phases.build]
 cmds = [
     "cd siiupa",
+    "apt install composer",
     "composer install --no-dev --no-scripts --prefer-dist --optimize-autoloader --no-interaction"
 ]
 

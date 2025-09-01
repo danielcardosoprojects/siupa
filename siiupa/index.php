@@ -1,6 +1,6 @@
 ﻿<?php
 session_start();
-
+var_dump($_SESSION);
 header("Access-Control-Allow-Origin: *");
 ini_set('display_errors', 0);       // Oculta erros na página
 ini_set('log_errors', 1);           // Ativa o registro de erros em log

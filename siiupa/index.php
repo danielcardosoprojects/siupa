@@ -4,7 +4,7 @@ ini_set('display_errors', 0);       // Oculta erros na página
 ini_set('log_errors', 1);           // Ativa o registro de erros em log
 ini_set('error_log', '/path/to/your/php-error.log'); // Especifique o caminho do arquivo de log
 error_reporting(E_ALL);             // Gera todos os tipos de erros
-header('Content-Type: text/html; charset=utf-8');
+//header('Content-Type: text/html; charset=utf-8');
 include("bd/conectabd.php");
 echo ($_SERVER['DOCUMENT_ROOT'] . '/conexao/verifica_login.php');
 

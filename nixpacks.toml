@@ -26,7 +26,8 @@ cmds = [
 ]
 
 [start]
-cmd = "php -S 0.0.0.0:$PORT router.php"
+cmd = "php -d display_errors=Off -d log_errors=On -d error_reporting=E_ERROR -S 0.0.0.0:$PORT router.php"
+
 workdir = "siiupa"
 
 [environment]

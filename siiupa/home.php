@@ -1,13 +1,3 @@
- <?php
-    @include("../conexao/verifica_login.php");
-    ?>
-
-
-
-
-
-
-
 <style>
     .card-body {
         display:flex;

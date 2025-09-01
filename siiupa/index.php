@@ -10,7 +10,6 @@ error_reporting(E_ALL);             // Gera todos os tipos de erros
 include("bd/conectabd.php");
 echo ($_SERVER['DOCUMENT_ROOT'] . '/conexao/verifica_login.php');
 
-include($_SERVER['DOCUMENT_ROOT'] . '/conexao/verifica_login.php');
 
 ?>
 

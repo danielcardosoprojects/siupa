@@ -17,6 +17,8 @@ nixPkgs = [
     "php81Extensions.exif", 
     "php81Extensions.pcntl", 
     "php81Extensions.bcmath",
+    "php81Extensions.session",
+    "php81Extensions.hash",  
     "composer"
 ]
 

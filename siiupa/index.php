@@ -1,7 +1,7 @@
 ﻿<?php
 session_start();
 if (!$_SESSION['usuario']) {
-	header('Location: /');
+	//header('Location: /');
 }
 //header("Access-Control-Allow-Origin: *");
 ini_set('display_errors', 0);       // Oculta erros na página
@@ -306,7 +306,7 @@ include("bd/conectabd.php");
 
 				<span>
 					<img src="/siiupa/administracao/rh/<?php echo $_SESSION['idServidorUsuario']; ?>/foto_perfil" height="75px" class="rounded-circle">
-					<span class="btn btn-outline-info">Usuário: <?php echo utf8_encode($_SESSION['nomeusuario']); ?>
+					<span class="btn btn-outline-info">Usuário: <?php echo $_SESSION['nomeusuario']; ?>
 						<img src="/siiupa/imagens/icones/nivel.svg" width="20px"><?php echo $_SESSION['nivel']; ?>
 					</span>
 					<a class="btn btn-outline-info" href='/conexao/redefinirsenha.php'>Troca senha</a>

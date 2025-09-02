@@ -25,6 +25,10 @@ if (is_dir($file)) {
         require $indexPath;
         return; // Termina a execução após carregar o index do subdiretório
     }
+        if (is_file($file . '/index.html')) {
+        require $file . '/index.php';
+        return; // Termina a execução após carregar o index do subdiretório
+    }
 }
 
 // Se nenhuma das condições acima for satisfeita, significa que a URL não

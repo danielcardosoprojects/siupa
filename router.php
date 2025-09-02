@@ -26,7 +26,7 @@ if (is_dir($file)) {
         return; // Termina a execução após carregar o index do subdiretório
     }
         if (is_file($file . '/index.html')) {
-        require $file . '/index.php';
+        require $file . '/index.html';
         return; // Termina a execução após carregar o index do subdiretório
     }
 }

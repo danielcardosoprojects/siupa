@@ -1,6 +1,6 @@
 <?php
 // siiupa/router.php
-
+session_start();
 // Pega o caminho da URL
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
